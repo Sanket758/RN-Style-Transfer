@@ -12,7 +12,7 @@ export default class StyleTransferApp extends Component {
     this.state = {
       baseImageUser: null,
       styleImageUser: null,
-      loading: true,
+      loading: null,
       output: null,
     }
   }
@@ -29,7 +29,7 @@ export default class StyleTransferApp extends Component {
       }else if(response.customButton){
           console.log('Clicked a custom Button');
       } else{
-          // console.log(response.uri)
+          console.log(response.uri)
           this.setState({
               baseImageUser : response.base64,
           });
@@ -49,7 +49,7 @@ export default class StyleTransferApp extends Component {
       }else if(response.customButton){
           console.log('Clicked a custom Button');
       } else{
-          // console.log(response.uri)
+          console.log(response.uri)
           this.setState({
               styleImageUser : response.base64,
           });
@@ -61,27 +61,31 @@ export default class StyleTransferApp extends Component {
     this.setState({
       baseImageUser: null,
       styleImageUser: null,
+      loading: null,
+      output: null,
     });
   }
 
   styleTransfer(){
-    axios.post('http://192.168.0.156:5000/', {
+    console.log('Started sending request....');
+    this.setState({loading: true});
+    axios.post('http://c1315d35589d.ngrok.io/', {
       'content_image': this.state.baseImageUser,
       'style_image': this.state.styleImageUser,
     }).then(res =>{
+      console.log('request completed!');
       console.log(res.data);
       this.setState({
-        loading: false,
         output: res.data,
+        loading:null,
       });
     }).catch(err => {
       console.log(err);
     });
   }
 
-
   render(){
-    const {baseImageUser, styleImageUser, loading} = this.state;
+    const {baseImageUser, styleImageUser} = this.state;
     return(
       baseImageUser == null || styleImageUser  == null ? (
         <View style={styles.container}>
@@ -114,13 +118,20 @@ export default class StyleTransferApp extends Component {
               buttonStyle={styles.button}
               onPress={this.styleTransfer.bind(this)}
               >
-              </Button>             
+              </Button> 
+
+              {
+                this.state.loading == null ?
+                  undefined
+                  :
+                  <ProgressBar indeterminate={true}></ProgressBar>
+              }
 
               {
                 this.state.output ?  
-                  undefined
-                   : 
-                   <Image source={{uri: `data:image/jpg;base64,${this.state.baseImageUser}` }} style={styles.artImage} />
+                   <Image source={{uri: `data:image/png;base64,${this.state.output}` }} style={styles.artImage} />
+                   :
+                   undefined
               }
         </View>
       )
@@ -131,7 +142,7 @@ export default class StyleTransferApp extends Component {
 const styles = StyleSheet.create({
   container:{
     flex: 1,
-    backgroundColor: 'grey',
+    backgroundColor: 'black',
   },
   titleContainer:{
     marginTop: 80,
