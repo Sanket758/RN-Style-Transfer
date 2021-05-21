@@ -12,6 +12,8 @@ export default class StyleTransferApp extends Component {
     this.state = {
       baseImageUser: null,
       styleImageUser: null,
+      loading: true,
+      output: null,
     }
   }
 
@@ -63,11 +65,15 @@ export default class StyleTransferApp extends Component {
   }
 
   styleTransfer(){
-    axios.post('http://192.168.0.105:5000/', {
+    axios.post('http://192.168.0.156:5000/', {
       'content_image': this.state.baseImageUser,
       'style_image': this.state.styleImageUser,
     }).then(res =>{
-      console.log(res);
+      console.log(res.data);
+      this.setState({
+        loading: false,
+        output: res.data,
+      });
     }).catch(err => {
       console.log(err);
     });
@@ -75,7 +81,7 @@ export default class StyleTransferApp extends Component {
 
 
   render(){
-    const {baseImageUser, styleImageUser} = this.state;
+    const {baseImageUser, styleImageUser, loading} = this.state;
     return(
       baseImageUser == null || styleImageUser  == null ? (
         <View style={styles.container}>
@@ -106,8 +112,17 @@ export default class StyleTransferApp extends Component {
             <Button 
               title="Transfer" 
               buttonStyle={styles.button}
-              onPress={this.styleTransfer.bind(this)}></Button>
-          </View>
+              onPress={this.styleTransfer.bind(this)}
+              >
+              </Button>             
+
+              {
+                this.state.output ?  
+                  undefined
+                   : 
+                   <Image source={{uri: `data:image/jpg;base64,${this.state.baseImageUser}` }} style={styles.artImage} />
+              }
+        </View>
       )
     )
   }
@@ -116,7 +131,7 @@ export default class StyleTransferApp extends Component {
 const styles = StyleSheet.create({
   container:{
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: 'grey',
   },
   titleContainer:{
     marginTop: 80,
